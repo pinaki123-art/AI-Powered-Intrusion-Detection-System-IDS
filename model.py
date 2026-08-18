@@ -7,7 +7,12 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization
 from tensorflow.keras.optimizers import Adam
 
-file_path = 'CIC Dataset\Friday-WorkingHours-Morning.pcap_ISCX.csv'
+import os
+
+file_path = os.path.join(
+    "CIC Dataset",
+    "Friday-WorkingHours-Morning.pcap_ISCX.csv"
+)
 df = pd.read_csv(file_path)
 
 df.columns = df.columns.str.strip()
@@ -15,6 +20,11 @@ df.columns = df.columns.str.strip()
 df_clean = df.drop(['Flow ID', 'Timestamp'], axis=1, errors='ignore')
 label_encoder = LabelEncoder()
 df_clean['Label'] = label_encoder.fit_transform(df_clean['Label'])
+
+import joblib
+
+joblib.dump(label_encoder, "label_encoder.pkl")
+
 df_clean.fillna(0, inplace=True)
 
 df_clean.replace([np.inf, -np.inf], np.nan, inplace=True)
@@ -64,3 +74,13 @@ test_loss, test_acc = model.evaluate(X_test, y_test)
 print(f'Test Accuracy: {test_acc:.4f}')
 
 predictions = model.predict(X_test)
+
+# Save the trained model
+model.save("ids_model.keras")
+
+# Save the scaler
+import joblib
+joblib.dump(scaler, "scaler.pkl")
+
+print("✅ Model saved successfully as ids_model.keras")
+print("✅ Scaler saved successfully as scaler.pkl")
